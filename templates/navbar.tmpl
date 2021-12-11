@@ -1,0 +1,48 @@
+{{define "navbar"}}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top mb-2">
+    <div class="container-fluid">
+
+        {{ if .FileName }}
+        <a class="navbar-brand" href="/index">Statistics Project 3 | {{ .FileName }}</a>
+        {{ else }}
+        <a class="navbar-brand" href="/index">Statistics Project 3</a>
+        {{end}}
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {{ if .FileName }}
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Actions
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/identifyNormDistribution">Identify norm distribution</a>
+                        </li>
+                    </ul>
+                </li>
+                {{end}}
+            </ul>
+
+            <form class="d-flex" enctype="multipart/form-data" action="/upload" method="post">
+                <select class="custom-select me-2" name="type">
+                    <option selected value="dep">Dependent</option>
+                    <option value="indep">Independent</option>
+                </select>
+
+                <input class="form-control me-2" name="file" type="file" placeholder="File"
+                       aria-label="File"/>
+                <button class="btn btn-outline-light" type="submit">Upload</button>
+            </form>
+        </div>
+    </div>
+</nav>
+{{end}}

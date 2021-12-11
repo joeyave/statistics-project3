@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+{{ template "header" . }}
+<body>
+{{ template "navbar" . }}
+
+<div class="container-fluid">
+    {{range $index, $variant := .Arr}}
+
+    <h1>{{$variant.Header}}</h1>
+
+    <div class="row">
+        <div class="col-md-2">
+            <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{$variant.PaperImage}}">
+        </div>
+        <div class="col-md-2">
+            <img class="img-fluid mx-auto d-block border"
+                 src="data:image/svg+xml;base64,{{$variant.eCDFImage}}">
+        </div>
+        <div class="col">
+            <p>
+                {{ range $index, $variant := $variant.Params }}
+                {{ $variant.Name }} = {{ $variant.Val }};
+                {{end}}
+            </p>
+
+            <p>
+                <b>{{$variant.IsNormStat.Name}}</b><br>
+                alpha = {{ printf "%.6f" $variant.IsNormStat.Alpha}}; value = {{ printf "%.6f"
+                $variant.IsNormStat.Val}}; p = {{
+                printf "%.6f" $variant.IsNormStat.P}}; p >= alpha => {{ $variant.IsNormStat.IsNorm }}
+            </p>
+            <p>
+                {{range $index, $variant := $variant.StatCharacteristics}}
+                {{ $variant.Name }} = {{ printf "%.6f" $variant.Val }}
+                [{{ printf "%.6f" $variant.From }}; {{ printf "%.6f" $variant.To }}];
+                <br>
+                {{end}}
+            </p>
+        </div>
+    </div>
+    <br>
+    {{end}}
+
+
+    <p>
+        {{range $index, $variant := .Stats}}
+        <b>{{$variant.Name}}</b><br>
+        alpha = {{ printf "%.6f" $variant.Alpha}}; value = {{ printf "%.6f" $variant.Val}};
+        p = {{ printf "%.6f" $variant.P}}; p >= alpha => {{ $variant.IsNorm }}
+        <br>
+        {{end}}
+
+        {{ if .StatWithU }}
+            <b>{{.StatWithU.Name}}</b><br>
+            alpha = {{ printf "%.6f" .StatWithU.Alpha}}; |U| = {{ printf "%.6f" .StatWithU.UAbs}};
+            u_1-alpha/2 = {{ printf "%.6f" .StatWithU.U}};  |U| <= u_1-alpha/2 => {{ .StatWithU.IsNorm }}
+        {{ end }}
+    </p>
+</div>
+
+{{template "footer" .}}
+</body>
+</html>

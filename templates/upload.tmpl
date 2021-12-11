@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+{{template "header" .}}
+<body>
+{{template "navbar" .}}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <table class="table table-bordered table-sm">
+                <thead>
+                <tr>
+                    <th>№</th>
+                    <th>x</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range $index, $variant := .X}}
+                <tr>
+                    <td>{{ add $index 1 }}</td>
+                    <td>{{ $variant }}</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-6">
+            <table class="table table-bordered table-sm">
+                <thead>
+                <tr>
+                    <th>№</th>
+                    <th>y</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range $index, $variant := .Y}}
+                <tr>
+                    <td>{{ add $index 1 }}</td>
+                    <td>{{ $variant }}</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{{template "footer" .}}
+</body>
+</html>
