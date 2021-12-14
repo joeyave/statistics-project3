@@ -854,11 +854,56 @@ func Ranks(x []float64) []float64 {
 	return ranks
 }
 
+func RanksForX(x []*ElemWithClass) []float64 {
+
+	m := map[float64][]float64{}
+	for i := range x {
+		if x[i].Class != "x" {
+			continue
+		}
+		m[x[i].Val] = append(m[x[i].Val], float64(i+1))
+	}
+
+	m2 := map[float64]float64{}
+	for k, v := range m {
+		m2[k] = Mean(v)
+	}
+
+	var ranks []float64
+	for i := range x {
+		if x[i].Class != "x" {
+			continue
+		}
+
+		ranks = append(ranks, m2[x[i].Val])
+	}
+
+	return ranks
+}
+
 func VanDerWaerdenTest(x, y []float64) float64 {
 
 	N := len(x) + len(y)
 
-	xRanks := Ranks(x)
+	var z []*ElemWithClass
+	for i := range x {
+		z = append(z, &ElemWithClass{
+			Class: "x",
+			Val:   x[i],
+		})
+	}
+	for i := range y {
+		z = append(z, &ElemWithClass{
+			Class: "y",
+			Val:   y[i],
+		})
+	}
+
+	sort.Slice(z, func(i, j int) bool {
+		return z[i].Val < z[j].Val
+	})
+
+	xRanks := RanksForX(z)
 
 	X := .0
 	for i := range xRanks {
@@ -875,4 +920,9 @@ func VanDerWaerdenTest(x, y []float64) float64 {
 	U := X / math.Sqrt(D)
 
 	return U
+}
+
+type ElemWithClass struct {
+	Class string
+	Val   float64
 }

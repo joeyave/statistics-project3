@@ -79,23 +79,27 @@ func IdentifyNormDistribution(c *gin.Context) {
 
 		if xKolmogorovStat.IsNorm && yKolmogorovStat.IsNorm {
 
-			t, p := helpers.TwoSampleTTest(x, y)
-			stats = append(stats, &templates.Stat{
-				Name:   "t (Two sample t-test)",
-				Val:    t,
-				P:      p,
-				IsNorm: p >= alpha,
-				Alpha:  alpha,
-			})
-
 			f, p := helpers.FTest(x, y)
-			stats = append(stats, &templates.Stat{
+			fTestStat := &templates.Stat{
 				Name:   "f (F test)",
 				Val:    f,
 				P:      p,
 				IsNorm: p >= alpha,
 				Alpha:  alpha,
-			})
+			}
+			stats = append(stats, fTestStat)
+
+			if fTestStat.IsNorm {
+				t, p := helpers.TwoSampleTTest(x, y)
+				stats = append(stats, &templates.Stat{
+					Name:   "t (Two sample t-test)",
+					Val:    t,
+					P:      p,
+					IsNorm: p >= alpha,
+					Alpha:  alpha,
+				})
+			}
+
 		} else {
 			U := helpers.VanDerWaerdenTest(x, y)
 
