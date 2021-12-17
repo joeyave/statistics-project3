@@ -51,10 +51,26 @@ func IdentifyNormDistribution(c *gin.Context) {
 				IsNorm: p >= alpha,
 				Alpha:  alpha,
 			})
+			f, p := helpers.FTest(x, y)
+			stats = append(stats, &templates.Stat{
+				Name:   "f (F test)",
+				Val:    f,
+				P:      p,
+				IsNorm: p >= alpha,
+				Alpha:  alpha,
+			})
+		} else {
+			u := helpers.WilcoxonSignedRankTest(x, y)
+			statWithU = &templates.StatWithU{
+				Name:   "u (Wilcoxon signed rank test)",
+				UAbs:   math.Abs(u),
+				U:      helpers.QuantileU(1 - alpha/2),
+				IsNorm: math.Abs(u) <= helpers.QuantileU(1-alpha/2),
+				Alpha:  alpha,
+			}
 		}
 
 	} else {
-
 		params, paperImage, eCDFImage, xKolmogorovStat, characteristics := identify(x)
 
 		arr = append(arr, map[string]interface{}{
@@ -93,6 +109,15 @@ func IdentifyNormDistribution(c *gin.Context) {
 				t, p := helpers.TwoSampleTTest(x, y)
 				stats = append(stats, &templates.Stat{
 					Name:   "t (Two sample t-test)",
+					Val:    t,
+					P:      p,
+					IsNorm: p >= alpha,
+					Alpha:  alpha,
+				})
+			} else {
+				t, p := helpers.WelchTwoSampleTTest(x, y)
+				stats = append(stats, &templates.Stat{
+					Name:   "t (Welch two sample t-test)",
 					Val:    t,
 					P:      p,
 					IsNorm: p >= alpha,

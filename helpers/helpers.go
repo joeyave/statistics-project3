@@ -830,6 +830,18 @@ func PairedTTest(x, y []float64) (t float64, p float64) {
 	return t, p
 }
 
+func WelchTwoSampleTTest(x, y []float64) (float64, float64) {
+
+	SSqrtX := math.Pow(StandardDeviation(x), 2)
+	SSqrtY := math.Pow(StandardDeviation(x), 2)
+
+	t := (Mean(x) - Mean(y)) / math.Sqrt((SSqrtX)/float64(len(x))+(SSqrtY/float64(len(y))))
+	nu := math.Pow(SSqrtX/float64(len(x))+SSqrtY/float64(len(y)), 2) / (math.Pow(SSqrtX/float64(len(x)), 2)/float64(len(x)-1) + math.Pow(SSqrtY/float64(len(y)), 2)/float64(len(y)-1))
+	p := 2 * (1 - StudentsCDF(nu)(math.Abs(t)))
+
+	return t, p
+}
+
 func Ranks(x []float64) []float64 {
 	var xCopy = make([]float64, len(x))
 	copy(xCopy, x)
@@ -846,21 +858,19 @@ func Ranks(x []float64) []float64 {
 		m2[k] = Mean(v)
 	}
 
-	var ranks = make([]float64, len(xCopy))
-	for i := range xCopy {
-		ranks[i] = m2[xCopy[i]]
+	var ranks = make([]float64, len(x))
+	for i := range x {
+		ranks[i] = m2[x[i]]
 	}
 
 	return ranks
 }
 
-func RanksForX(x []*ElemWithClass) []float64 {
+func RanksWithClassForX(x []*ElemWithClass) []float64 {
 
+	// сделать ранги для общей выборки и вытащить Xы
 	m := map[float64][]float64{}
 	for i := range x {
-		if x[i].Class != "x" {
-			continue
-		}
 		m[x[i].Val] = append(m[x[i].Val], float64(i+1))
 	}
 
@@ -879,6 +889,50 @@ func RanksForX(x []*ElemWithClass) []float64 {
 	}
 
 	return ranks
+}
+
+func WilcoxonSignedRankTest(x, y []float64) float64 {
+
+	var diff []float64
+	for i := range x {
+		if (x[i] - y[i]) != 0 {
+			diff = append(diff, x[i]-y[i])
+		}
+	}
+
+	s := make(map[float64]int)
+	for _, z := range diff {
+		if z > 0 {
+			s[z] = 1
+		} else {
+			s[z] = 0
+		}
+	}
+
+	var absDiff []float64
+	for _, z := range diff {
+		absDiff = append(absDiff, math.Abs(z))
+	}
+
+	ranks := Ranks(absDiff)
+
+	T := 0.
+	for i, z := range absDiff {
+		T += float64(s[z]) * ranks[i]
+	}
+
+	E := float64(len(diff)*(len(diff)+1)) / 4
+
+	D := float64(len(diff)*(len(diff)+1)*(2*len(diff)+1)) / 24
+	u := (T - E) / math.Sqrt(D)
+
+	//normal := distuv.Normal{
+	//	Mu: Mean(diff),
+	//	Sigma: StandardDeviation(diff),
+	//}
+	//p := 2 * (1 - normal.CDF(math.Abs(u)))
+
+	return u
 }
 
 func VanDerWaerdenTest(x, y []float64) float64 {
@@ -903,11 +957,11 @@ func VanDerWaerdenTest(x, y []float64) float64 {
 		return z[i].Val < z[j].Val
 	})
 
-	xRanks := RanksForX(z)
+	ranks := RanksWithClassForX(z)
 
 	X := .0
-	for i := range xRanks {
-		X += QuantileU(xRanks[i] / (float64(N) + 1))
+	for i := range ranks {
+		X += QuantileU(ranks[i] / (float64(N) + 1))
 	}
 
 	sum := .0
